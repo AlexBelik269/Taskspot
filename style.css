@@ -1,70 +1,46 @@
+/* Reset CSS */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Source Code Pro', monospace;
+    background-color: #1e1e1e;
+    color: #fff;
 }
 
 header {
-    background-color: #333;
-    color: #fff;
-    padding: 20px;
-}
-
-.title {
-    text-align: center;
-    font-family: "Source Code Pro", monospace;
-    font-optical-sizing: auto;
-    font-weight: 400;
-    font-style: normal;
-    font-size: 350%;
-}
-
-nav {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex;
+    justify-content: space-between;
     align-items: center;
     padding: 20px;
 }
 
-.nav1, .nav2 {
+.title {
+
+    font-size: 50px;
+}
+
+nav ul {
     list-style-type: none;
-    margin: 0; 
-    padding: 0;
+    display: flex;
 }
 
-.nav1 {
-    text-align: left;
-}
-
-.nav2 {
-    text-align: right;
-}
-
-.nav1 li, .nav2 li {
-    display: inline;
-}
-
-.nav1 a, .nav2 a {
-    text-decoration: none;
-    color: #fff;
+nav ul li {
     margin-right: 20px;
 }
 
-
-
-main {
-    padding: 20px;
+nav ul li a {
+    text-decoration: none;
+    color: #fff;
+    font-size: 18px;
 }
 
 .hero {
     text-align: center;
-    padding: 50px 0;
-    background-color: #f4f4f4;
+    padding: 100px 0;
 }
 
 .hero h2 {
@@ -84,8 +60,10 @@ main {
     color: #fff;
     text-decoration: none;
     border-radius: 5px;
+    font-size: 18px;
+    margin-right: 10px;
+    cursor: pointer;
     transition: background-color 0.3s ease;
-    margin: 10px 20px;
 }
 
 .btn:hover {
@@ -93,7 +71,8 @@ main {
 }
 
 .features {
-    margin-top: 50px;
+    text-align: center;
+    padding: 50px 0;
 }
 
 .features h2 {
@@ -106,12 +85,12 @@ main {
 }
 
 .features ul li {
+    font-size: 18px;
     margin-bottom: 10px;
 }
 
 footer {
-    background-color: #333;
-    color: #fff;
     text-align: center;
     padding: 20px;
+    background-color: #333;
 }
