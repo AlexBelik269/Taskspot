@@ -1,0 +1,84 @@
+.task-grid {
+    display: grid;
+    grid-template-columns: auto auto auto; /* Three boxes in each row */
+    margin-top: 20px;
+    padding: 20px;
+}
+.task-box {
+    border: 1px solid #ccc;
+    padding: 20px;
+    margin: 30px;
+    border-radius: 10px;
+    box-sizing: border-box; /* Ensure padding doesn't affect box size */
+    overflow: hidden; /* Hide overflow content */
+}
+
+.task-title {
+    font-weight: bold;
+    font-size: 23px;
+    margin-bottom: 10px;
+}
+
+.task-details {
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.popup {
+    position: fixed; /* Fixed position to overlay everything */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #f9f9f9; /* Light background color */
+    border-radius: 10px;
+    box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.2); /* Shadow effect */
+    padding: 20px;
+    max-width: 400px; /* Adjust width as needed */
+    z-index: 9999; /* Ensure popup is above other content */
+}
+
+.popup h2 {
+    font-size: 24px;
+    margin-top: 0;
+    color: rgb(0, 0, 0);
+}
+
+.popup p {
+    font-size: 16px;
+    margin-bottom: 10px;
+    color: rgb(0, 0, 0);
+}
+
+.popup button {
+    background-color: #4c4caf;
+    color: rgb(0, 0, 0);
+    font-size: 16px;
+    font-family: 'Source Code Pro', monospace;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.popup button:hover {
+    background-color: #394059;
+}
+
+
+.take-task-button {
+    background-color: #4c4caf;
+    color: white;
+    font-size: 13px;
+    font-family: 'Source Code Pro', monospace;
+    padding: 10px 20px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.take-task-button:hover {
+    background-color: #7070c1;
+}
