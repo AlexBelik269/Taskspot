@@ -1,7 +1,7 @@
 .task-grid {
     display: grid;
     grid-template-columns: auto auto auto; /* Three boxes in each row */
-    margin-top: 20px;
+    margin-top: 10px;
     padding: 20px;
 }
 .task-box {
@@ -20,6 +20,11 @@
 }
 
 .task-details {
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.task-duration {
     font-size: 14px;
     margin-bottom: 10px;
 }
