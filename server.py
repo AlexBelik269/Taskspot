@@ -6,45 +6,41 @@ import os
 app = Flask(__name__, static_folder='taskspot')
 CORS(app)
 
-def connect_to_database():
-    return sqlite3.connect('databank.db')
+def get_db_connection():
+    conn = sqlite3.connect('databank.db')
+    conn.row_factory = sqlite3.Row
+    return conn
 
 @app.route('/tasks', methods=['GET'])
 def get_tasks():
-    conn = connect_to_database()
-    cursor = conn.cursor()
-    cursor.execute("SELECT title, description, city, duration, price FROM tasks")
-    tasks = cursor.fetchall()
+    conn = get_db_connection()
+    tasks = conn.execute('SELECT * FROM tasks').fetchall()
     conn.close()
 
     task_list = []
     for task in tasks:
-        task_dict = {
-            "title": task[0],
-            "description": task[1],
-            "place": task[2],
-            "duration": task[3],
-            "price": task[4]
-        }
-        task_list.append(task_dict)
-
+        task_list.append({
+            'taskID': task['taskID'],
+            'title': task['title'],
+            'city': task['city'],
+            'description': task['description'],
+            'duration': task['duration'],
+            'price': task['price']
+        })
     return jsonify(task_list)
 
 @app.route('/save_message', methods=['POST'])
 def save_message():
-    message_text = request.form.get('text')
-    task_id = request.form.get('task_id')
+    task_id = request.form['fk_taskID']
+    message_text = request.form['text']
 
-    if message_text and task_id:
-        conn = connect_to_database()
-        cursor = conn.cursor()
-        cursor.execute('INSERT INTO messages (text, fk_taskID) VALUES (?, ?)', (message_text, task_id))
-        conn.commit()
-        conn.close()
-        return jsonify({"status": "success", "message": "Message saved successfully"})
-    else:
-        return jsonify({"status": "error", "message": "Invalid data"}), 400
+    conn = get_db_connection()
+    conn.execute('INSERT INTO messages (fk_taskID, text) VALUES (?, ?)',
+                 (task_id, message_text))
+    conn.commit()
+    conn.close()
 
+    return jsonify({'status': 'success'})
 
 # Serve the HTML file
 @app.route('/get-job')
@@ -58,4 +54,3 @@ def serve_static_files(path):
 
 if __name__ == '__main__':
     app.run(debug=True)
-

@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 const place = document.createElement("div");
                 place.classList.add("task-details");
-                place.textContent = "Place: " + task.place;
+                place.textContent = "Place: " + task.city;  // Correctly use task.city instead of task.place
 
                 const description = document.createElement("div");
                 description.classList.add("task-details");
@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     taskTitle.textContent = task.title;
 
                     const taskPlace = document.createElement("p");
-                    taskPlace.textContent = "Place: " + task.place;
+                    taskPlace.textContent = "Place: " + task.city;
 
                     const taskDescription = document.createElement("p");
                     taskDescription.textContent = "Description: " + task.description;
@@ -67,7 +67,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         // Send message to the server
                         const formData = new FormData();
                         formData.append('text', messageText);
-                        formData.append('task_id', task.taskID);  // assuming task.taskID is part of the fetched task data
+                        formData.append('fk_taskID', task.taskID);  // Correctly use taskID
 
                         fetch('http://localhost:5000/save_message', {
                             method: 'POST',

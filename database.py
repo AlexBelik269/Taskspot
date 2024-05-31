@@ -34,7 +34,7 @@ def initialize_database():
                ''')
     
     cursor.execute('''CREATE TABLE messages 
-                  (messageID INTEGER PRIMARY KEY,
+                  (messageID INTEGER PRIMARY KEY AUTOINCREMENT,
                    text TEXT,
                    fk_taskID INTEGER,
                    FOREIGN KEY (fk_taskID) REFERENCES tasks(taskID) )
