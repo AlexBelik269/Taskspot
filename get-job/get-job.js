@@ -62,9 +62,26 @@ document.addEventListener("DOMContentLoaded", function () {
                     const confirmButton = document.createElement("button");
                     confirmButton.textContent = "Confirm";
                     confirmButton.addEventListener("click", function() {
-                        // Close the popup window
-                        popup.remove();
-                        // You can add logic here to handle the confirmation
+                        const messageText = messageInput.value;
+                        
+                        // Send message to the server
+                        const formData = new FormData();
+                        formData.append('text', messageText);
+                        formData.append('task_id', task.taskID);  // assuming task.taskID is part of the fetched task data
+
+                        fetch('http://localhost:5000/save_message', {
+                            method: 'POST',
+                            body: formData
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log('Success:', data);
+                            // Close the popup window
+                            popup.remove();
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                        });
                     });
 
                     taskInfo.appendChild(taskTitle);

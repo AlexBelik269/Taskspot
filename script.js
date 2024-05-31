@@ -1,4 +1,3 @@
-
 function login(event) {
     event.preventDefault(); // Prevent form submission
 

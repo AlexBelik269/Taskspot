@@ -14,6 +14,7 @@ def initialize_database():
     cursor = conn.cursor()
     cursor.execute('DROP TABLE IF EXISTS users;')
     cursor.execute('DROP TABLE IF EXISTS tasks;')
+    cursor.execute('DROP TABLE IF EXISTS messages;')
 
     cursor.execute('''CREATE TABLE users
                   (userID INTEGER PRIMARY KEY, 
@@ -30,6 +31,13 @@ def initialize_database():
                    city TEXT, 
                    duration TEXT, 
                    price INTEGER)
+               ''')
+    
+    cursor.execute('''CREATE TABLE messages 
+                  (messageID INTEGER PRIMARY KEY,
+                   text TEXT,
+                   fk_taskID INTEGER,
+                   FOREIGN KEY (fk_taskID) REFERENCES tasks(taskID) )
                ''')
 
     Users = [

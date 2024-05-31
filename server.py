@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, send_from_directory
+from flask import Flask, jsonify, send_from_directory, request
 from flask_cors import CORS
 import sqlite3
 import os
@@ -30,6 +30,22 @@ def get_tasks():
 
     return jsonify(task_list)
 
+@app.route('/save_message', methods=['POST'])
+def save_message():
+    message_text = request.form.get('text')
+    task_id = request.form.get('task_id')
+
+    if message_text and task_id:
+        conn = connect_to_database()
+        cursor = conn.cursor()
+        cursor.execute('INSERT INTO messages (text, fk_taskID) VALUES (?, ?)', (message_text, task_id))
+        conn.commit()
+        conn.close()
+        return jsonify({"status": "success", "message": "Message saved successfully"})
+    else:
+        return jsonify({"status": "error", "message": "Invalid data"}), 400
+
+
 # Serve the HTML file
 @app.route('/get-job')
 def serve_get_job():
@@ -42,3 +58,4 @@ def serve_static_files(path):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
