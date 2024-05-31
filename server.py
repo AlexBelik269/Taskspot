@@ -42,6 +42,23 @@ def save_message():
 
     return jsonify({'status': 'success'})
 
+@app.route('/save_task', methods=['POST'])
+def save_task():
+    title = request.form['title']
+    description = request.form['description']
+    city = request.form['city']
+    duration = request.form['duration']
+    price = request.form['price']
+
+    conn = get_db_connection()
+    conn.execute('INSERT INTO tasks (title, description, city, duration, price) VALUES (?, ?, ?, ?, ?)',
+                 (title, description, city, duration, price))
+    conn.commit()
+    conn.close()
+
+    return jsonify({'status': 'success'})
+
+
 # Serve the HTML file
 @app.route('/get-job')
 def serve_get_job():
