@@ -12,15 +12,14 @@
 </head>
 <body>
     <header>
-        <h1 class="title">TaskSpot</h1>
+        <h1 class="title"><a href="home.html">TaskSpot</a></h1>
         <nav>
             <ul class ="nav1">
                 <li><a href="home.html">Home</a></li>
                 <li><a href="about.html">About</a></li>
                 <li><a href="contact.html">Contact</a></li>
             </ul>
-            <ul class ="nav2">
-                <li><a href="login/login.html">Login/Register  <i class="fas fa-sign-in-alt"></i></a></li>
+            <ul class="nav2" id="nav-links">
             </ul>
         </nav>
     </header>    
@@ -28,21 +27,28 @@
         <section class="hero">
             <h2>Find or Post Short-term Jobs</h2>
             <p>TaskSpot connects people looking for quick tasks with those who need them done.</p>
-            <a href="get-job/get-job.html"><button class="btn">Get Job</button></a>
-            <a href="post-job/post-job.html"><button class="btn">Post Job</button></a>
+            <button class="btn" onclick="handleGetJob()">Get Job</button>
+            <button class="btn" onclick="handlePostJob()">Post Job</button>
         </section>
         <section class="features">
-            <h2>Key Features</h2>
+            <h2>Key Feature</h2>
             <ul>
-                <li>Easy job search</li>
                 <li>Simple job posting</li>
-                <li>Secure communication</li>
             </ul>
         </section>
     </main>
     <footer>
         <p>&copy; 2024 TaskSpot. All rights reserved.</p>
     </footer>
+
+        <!-- Modal for login/signup prompt -->
+        <div id="loginModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal()">&times;</span>
+                <p>To continue, please <a href="login/login.html">log in</a> or <a href="signup/signup.html">sign up</a>.</p>
+            </div>
+        </div>
+
     <script src="script.js"></script>
 </body>
 </html>

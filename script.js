@@ -1,20 +1,39 @@
-function login(event) {
-    event.preventDefault(); // Prevent form submission
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if user is logged in (this can be replaced with real authentication logic)
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+    updateNavLinks(isLoggedIn);
+});
 
-    // Get username and password values from the form
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
+function updateNavLinks(isLoggedIn) {
+    const navLinks = document.getElementById('nav-links');
+    navLinks.innerHTML = ''; // Clear existing links
 
-    // Here you can add code to send a request to your server to handle the login process
-    // For now, let's just display a message based on the entered credentials
-    if (username === 'admin' && password === 'password') {
-        alert('Login successful!');
+    if (isLoggedIn) {
+        navLinks.innerHTML += '<li><a href="myJob.html">My Job Post</a></li>';
     } else {
-        const errorMessage = document.getElementById('errorMessage');
-        errorMessage.textContent = 'Invalid username or password.';
-        errorMessage.classList.remove('hidden');
+        navLinks.innerHTML += '<li><a href="login/login.html">Login/Register <i class="fas fa-sign-in-alt"></i></a></li>';
     }
 }
 
+function handleGetJob() {
+    window.location.href = 'get-job/get-job.html';
+}
 
+function handlePostJob() {
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+    if (isLoggedIn) {
+        window.location.href = 'post-job/post-job.html';
+    } else {
+        showModal();
+    }
+}
 
+function showModal() {
+    const modal = document.getElementById('loginModal');
+    modal.style.display = 'block';
+}
+
+function closeModal() {
+    const modal = document.getElementById('loginModal');
+    modal.style.display = 'none';
+}

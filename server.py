@@ -1,14 +1,15 @@
-from flask import Flask, jsonify, send_from_directory, request
+from flask import Flask, jsonify, send_from_directory, request, render_template, session, redirect, url_for
 from flask_cors import CORS
 import sqlite3
 import hashlib
 
 app = Flask(__name__, static_folder='taskspot')
 CORS(app)
+app.secret_key = 'your_secret_key'  # Ensure this is a secret value
 database_path = 'databank.db'
 
 def get_db_connection():
-    conn = sqlite3.connect('databank.db')
+    conn = sqlite3.connect(database_path)
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -59,12 +60,6 @@ def save_task():
 
     return jsonify({'status': 'success'})
 
-def get_db_connection():
-    conn = sqlite3.connect(database_path)
-    conn.row_factory = sqlite3.Row
-    return conn
-
-# -------- LOGIN --------
 @app.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
@@ -78,11 +73,12 @@ def login():
     conn.close()
 
     if user:
+        session['user'] = user['username']
+        session['user_id'] = user['userID']  # Changed to 'userID'
         return jsonify({'success': True})
     else:
         return jsonify({'success': False})
 
-# -------- SIGNUP ----------
 @app.route('/signup', methods=['POST'])
 def signup():
     data = request.get_json()
@@ -105,17 +101,23 @@ def signup():
 
     return jsonify({'success': True})
 
-
-
-# Serve the HTML file
 @app.route('/get-job')
 def serve_get_job():
     return send_from_directory(app.static_folder, 'get-job/get-job.html')
 
-# Serve other static files like CSS, JS
 @app.route('/<path:path>')
 def serve_static_files(path):
     return send_from_directory(app.static_folder, path)
+
+@app.route('/')
+def home():
+    logged_in = 'user' in session
+    return render_template('home.html', logged_in=logged_in)
+
+@app.route('/logout')
+def logout():
+    session.pop('user', None)
+    return jsonify({'success': True})
 
 if __name__ == '__main__':
     app.run(debug=True)
