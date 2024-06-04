@@ -1,4 +1,5 @@
 import sqlite3
+import hashlib
 
 def connect_to_database():
     return sqlite3.connect('databank.db')
@@ -41,15 +42,16 @@ def initialize_database():
                ''')
 
     Users = [
-        ('MaliDoli', '1234', 'mali@doli.com', 'Basel'),
-        ('RichiDom', '5678', 'richi@dom.com', 'Luzern'),
-        ('TomiMan', '789', 'tomi@man.com', 'Chur'),
-        ('AniMoni', '7777', 'ani@moni.com', 'Sursee'),
-        ('RusMus', '9876', 'rus@mus.com', 'Geneva'),
-        ('User1', '123', 'user@1.com', 'Zürich'),
-        ('User2', '234', 'user@2.com', 'Luzern'),
+        ('MaliDoli', hashlib.sha256('1234'.encode()).hexdigest(), 'mali@doli.com', 'Basel'),
+        ('RichiDom', hashlib.sha256('5678'.encode()).hexdigest(), 'richi@dom.com', 'Luzern'),
+        ('TomiMan', hashlib.sha256('789'.encode()).hexdigest(), 'tomi@man.com', 'Chur'),
+        ('AniMoni', hashlib.sha256('7777'.encode()).hexdigest(), 'ani@moni.com', 'Sursee'),
+        ('RusMus', hashlib.sha256('9876'.encode()).hexdigest(), 'rus@mus.com', 'Geneva'),
+        ('User1', hashlib.sha256('123'.encode()).hexdigest(), 'user@1.com', 'Zürich'),
+        ('User2', hashlib.sha256('234'.encode()).hexdigest(), 'user@2.com', 'Luzern'),
     ]
     cursor.executemany("INSERT INTO users (username, password, email, user_city) VALUES (?, ?, ?, ?)", Users)
+
 
     Tasks = [
         ('Mow the Lawn', 'I need someone to mow my lawn. It\'s a medium-sized garden. Equipment will be provided.', 'Luzern', '2h', '100CHF'),
@@ -82,3 +84,4 @@ def initialize_database():
     conn.close()
 
 #initialize_database()
+

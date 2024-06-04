@@ -1,10 +1,11 @@
 from flask import Flask, jsonify, send_from_directory, request
 from flask_cors import CORS
 import sqlite3
-import os
+import hashlib
 
 app = Flask(__name__, static_folder='taskspot')
 CORS(app)
+database_path = 'databank.db'
 
 def get_db_connection():
     conn = sqlite3.connect('databank.db')
@@ -57,6 +58,53 @@ def save_task():
     conn.close()
 
     return jsonify({'status': 'success'})
+
+def get_db_connection():
+    conn = sqlite3.connect(database_path)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+# -------- LOGIN --------
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    email = data.get('email')
+    password = hashlib.sha256(data.get('password').encode()).hexdigest()
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM users WHERE email = ? AND password = ?', (email, password))
+    user = cursor.fetchone()
+    conn.close()
+
+    if user:
+        return jsonify({'success': True})
+    else:
+        return jsonify({'success': False})
+
+# -------- SIGNUP ----------
+@app.route('/signup', methods=['POST'])
+def signup():
+    data = request.get_json()
+    username = data.get('username')
+    email = data.get('email')
+    password = hashlib.sha256(data.get('password').encode()).hexdigest()
+    city = data.get('city')
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute('SELECT * FROM users WHERE email = ?', (email,))
+    if cursor.fetchone():
+        conn.close()
+        return jsonify({'success': False, 'message': 'Email already exists'})
+
+    cursor.execute('INSERT INTO users (username, password, email, user_city) VALUES (?, ?, ?, ?)', (username, password, email, city))
+    conn.commit()
+    conn.close()
+
+    return jsonify({'success': True})
+
 
 
 # Serve the HTML file

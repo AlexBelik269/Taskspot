@@ -13,10 +13,10 @@
     <div class="login form">
       <header>Login</header>
       <form action="#">
-        <input type="text" placeholder="Enter your email">
-        <input type="password" placeholder="Enter your password">
-        <a href="#">Forgot password?</a>
-        <input type="button" class="button" value="Login">
+        <input type="text" id="loginEmail" placeholder="Enter your email">
+        <input type="password" id="loginPassword" placeholder="Enter your password">
+        <div id="loginError" class="error-message"></div>
+        <input type="button" class="button" value="Login" onclick="login()">
       </form>
       <div class="signup">
         <span class="signup">Don't have an account?
@@ -27,10 +27,13 @@
     <div class="registration form">
       <header>Signup</header>
       <form action="#">
-        <input type="text" placeholder="Enter your email">
-        <input type="password" placeholder="Create a password">
-        <input type="password" placeholder="Confirm your password">
-        <input type="button" class="button" value="Signup">
+        <input type="text" id="signupUsername" name="username" placeholder="Enter your username">
+        <input type="text" id="signupEmail" placeholder="Enter your email">
+        <input type="password" id="signupPassword" placeholder="Create a password">
+        <input type="password" id="confirmPassword" placeholder="Confirm your password">
+        <div id="signupError" class="error-message"></div>
+        <input type="text" id="signupCity" name="city" placeholder="Enter your city">
+        <input type="button" class="button" value="Signup" onclick="signup()">
       </form>
       <div class="signup">
         <span class="signup">Already have an account?
@@ -39,5 +42,6 @@
       </div>
     </div>
   </div>
+  <script src="login.js"></script>
 </body>
 </html>

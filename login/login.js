@@ -1,15 +1,68 @@
-document.querySelector('.login.form form').addEventListener('submit', function(event) {
-    event.preventDefault();
-    const formData = new FormData(this);
-    fetch('login.php', {
-      method: 'POST',
-      body: formData
-    })
-    .then(response => response.text())
-    .then(data => {
-      console.log(data); // Handle response from the server
-    })
-    .catch(error => {
-      console.error('Error:', error);
-    });
-  });
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelector('.button[value="Login"]').addEventListener('click', login);
+  document.querySelector('.button[value="Signup"]').addEventListener('click', signup);
+});
+
+function login() {
+  const email = document.getElementById('loginEmail').value;
+  const password = document.getElementById('loginPassword').value;
+  const loginError = document.getElementById('loginError');
+  const loginEmail = document.getElementById('loginEmail');
+  const loginPassword = document.getElementById('loginPassword');
+
+  fetch('http://localhost:5000/login', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ email, password }),
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      window.location.href = '../home.html';
+    } else {
+      loginError.textContent = 'Incorrect email or password';
+      loginEmail.classList.add('error');
+      loginPassword.classList.add('error');
+    }
+  })
+  .catch(error => console.error('Error:', error));
+}
+
+function signup() {
+  const email = document.getElementById('signupEmail').value;
+  const password = document.getElementById('signupPassword').value;
+  const confirmPassword = document.getElementById('confirmPassword').value;
+  const username = document.getElementById('signupUsername').value;
+  const city = document.getElementById('signupCity').value;
+  const signupError = document.getElementById('signupError');
+  const signupEmail = document.getElementById('signupEmail');
+  const signupPassword = document.getElementById('signupPassword');
+  const confirmPass = document.getElementById('confirmPassword');
+
+  if (password !== confirmPassword) {
+    signupError.textContent = 'Passwords do not match';
+    signupPassword.classList.add('error');
+    confirmPass.classList.add('error');
+    return;
+  }
+
+  fetch('http://localhost:5000/signup', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ email, password, username, city }),
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      window.location.href = '../home.html';
+    } else {
+      signupError.textContent = 'Signup failed: ' + data.message;
+      signupEmail.classList.add('error');
+    }
+  })
+  .catch(error => console.error('Error:', error));
+}
