@@ -38,7 +38,10 @@ def initialize_database():
                   (messageID INTEGER PRIMARY KEY AUTOINCREMENT,
                    text TEXT,
                    fk_taskID INTEGER,
-                   FOREIGN KEY (fk_taskID) REFERENCES tasks(taskID) )
+                   userID INTEGER,
+                   feedback TEXT,
+                   FOREIGN KEY (fk_taskID) REFERENCES tasks(taskID),
+                   FOREIGN KEY (userID) REFERENCES users(userID))
                ''')
 
     Users = [

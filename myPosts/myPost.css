@@ -1,0 +1,59 @@
+
+.user-info {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.box {
+    background-color: #333;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    padding: 20px;
+}
+
+.box h3 {
+    margin-top: 0;
+}
+
+.box-content {
+    border-top: 1px solid #eee;
+    margin-top: 10px;
+    padding-top: 10px;
+}
+
+.message-item,
+.job-post-item {
+    border-bottom: 1px solid #eee;
+    padding: 10px 0;
+}
+
+.message-item:last-child,
+.job-post-item:last-child {
+    border-bottom: none;
+}
+
+.message-feedback,
+.message-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.message-feedback i,
+.message-controls i {
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+.message-feedback i.accepted {
+    color: green;
+}
+
+.message-feedback i.rejected {
+    color: red;
+}
+
+.message-feedback i.pending {
+    color: orange;
+}

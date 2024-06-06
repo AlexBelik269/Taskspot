@@ -8,7 +8,7 @@ function updateNavLinks(isLoggedIn) {
     navLinks.innerHTML = ''; // Clear existing links
 
     if (isLoggedIn) {
-        navLinks.innerHTML += '<li><a href="myJob.html">My Job Postings  </a></li>';
+        navLinks.innerHTML += '<li><a href="myPosts/myPost.html">My Job Postings  </a></li>';
         navLinks.innerHTML += '<li><a href="#" onclick="handleLogout()">   Logout</a></li>';
     } else {
         navLinks.innerHTML += '<li><a href="login/login.html">Login/Signup <i class="fas fa-sign-in-alt"></i></a></li>';
