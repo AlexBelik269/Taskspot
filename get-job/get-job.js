@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 const place = document.createElement("div");
                 place.classList.add("task-details");
-                place.textContent = "Place: " + task.city;  // Correctly use task.city instead of task.place
+                place.textContent = "Place: " + task.city;
 
                 const description = document.createElement("div");
                 description.classList.add("task-details");
@@ -32,6 +32,12 @@ document.addEventListener("DOMContentLoaded", function () {
                 takeTaskButton.textContent = "Take this Task!";
                 takeTaskButton.classList.add("take-task-button");
                 takeTaskButton.addEventListener("click", function() {
+                    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+                    if (!isLoggedIn) {
+                        showModal();
+                        return;
+                    }
+
                     // Create and display the popup window
                     const popup = document.createElement("div");
                     popup.classList.add("popup");
@@ -67,7 +73,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         // Send message to the server
                         const formData = new FormData();
                         formData.append('text', messageText);
-                        formData.append('fk_taskID', task.taskID);  // Correctly use taskID
+                        formData.append('fk_taskID', task.taskID);
 
                         fetch('http://localhost:5000/save_message', {
                             method: 'POST',
@@ -110,3 +116,14 @@ document.addEventListener("DOMContentLoaded", function () {
         })
         .catch(error => console.error('Error fetching tasks:', error));
 });
+
+function showModal() {
+    const modal = document.getElementById('loginModal');
+    modal.style.display = 'block';
+}
+
+function closeModal() {
+    const modal = document.getElementById('loginModal');
+    modal.style.display = 'none';
+}
+
