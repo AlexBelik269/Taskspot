@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Check if user is logged in (this can be replaced with real authentication logic)
     const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
     updateNavLinks(isLoggedIn);
 });
@@ -9,9 +8,10 @@ function updateNavLinks(isLoggedIn) {
     navLinks.innerHTML = ''; // Clear existing links
 
     if (isLoggedIn) {
-        navLinks.innerHTML += '<li><a href="myJob.html">My Job Post</a></li>';
+        navLinks.innerHTML += '<li><a href="myJob.html">My Job Postings  </a></li>';
+        navLinks.innerHTML += '<li><a href="#" onclick="handleLogout()">   Logout</a></li>';
     } else {
-        navLinks.innerHTML += '<li><a href="login/login.html">Login/Register <i class="fas fa-sign-in-alt"></i></a></li>';
+        navLinks.innerHTML += '<li><a href="login/login.html">Login/Signup <i class="fas fa-sign-in-alt"></i></a></li>';
     }
 }
 
@@ -36,4 +36,9 @@ function showModal() {
 function closeModal() {
     const modal = document.getElementById('loginModal');
     modal.style.display = 'none';
+}
+
+function handleLogout() {
+    localStorage.removeItem('isLoggedIn');
+    window.location.href = 'home.html';
 }

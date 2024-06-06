@@ -7,8 +7,6 @@ function login() {
   const email = document.getElementById('loginEmail').value;
   const password = document.getElementById('loginPassword').value;
   const loginError = document.getElementById('loginError');
-  const loginEmail = document.getElementById('loginEmail');
-  const loginPassword = document.getElementById('loginPassword');
 
   fetch('http://localhost:5000/login', {
     method: 'POST',
@@ -20,11 +18,12 @@ function login() {
   .then(response => response.json())
   .then(data => {
     if (data.success) {
+      localStorage.setItem('isLoggedIn', 'true');
       window.location.href = '../home.html';
     } else {
       loginError.textContent = 'Incorrect email or password';
-      loginEmail.classList.add('error');
-      loginPassword.classList.add('error');
+      document.getElementById('loginEmail').classList.add('error');
+      document.getElementById('loginPassword').classList.add('error');
     }
   })
   .catch(error => console.error('Error:', error));
@@ -37,14 +36,11 @@ function signup() {
   const username = document.getElementById('signupUsername').value;
   const city = document.getElementById('signupCity').value;
   const signupError = document.getElementById('signupError');
-  const signupEmail = document.getElementById('signupEmail');
-  const signupPassword = document.getElementById('signupPassword');
-  const confirmPass = document.getElementById('confirmPassword');
 
   if (password !== confirmPassword) {
     signupError.textContent = 'Passwords do not match';
-    signupPassword.classList.add('error');
-    confirmPass.classList.add('error');
+    document.getElementById('signupPassword').classList.add('error');
+    document.getElementById('confirmPassword').classList.add('error');
     return;
   }
 
@@ -58,10 +54,11 @@ function signup() {
   .then(response => response.json())
   .then(data => {
     if (data.success) {
+      localStorage.setItem('isLoggedIn', 'true');
       window.location.href = '../home.html';
     } else {
       signupError.textContent = 'Signup failed: ' + data.message;
-      signupEmail.classList.add('error');
+      document.getElementById('signupEmail').classList.add('error');
     }
   })
   .catch(error => console.error('Error:', error));
