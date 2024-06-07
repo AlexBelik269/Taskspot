@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request, send_from_directory, session, render_
 from flask_cors import CORS # type: ignore
 import sqlite3
 import hashlib
+import uuid
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
@@ -78,11 +79,15 @@ def login():
     conn.close()
 
     if user:
-        session['username'] = user['username']
+        session_id = str(uuid.uuid4())
         session['user_id'] = user['userID']
-        return jsonify({'success': True})
+        session['sessionID'] = session_id
+        return jsonify({'success': True, 'sessionID': session_id})
     else:
         return jsonify({'success': False})
+
+def verify_session(session_id):
+    return session.get('sessionID') == session_id
 
     
 # -------- SIGNUP --------
@@ -128,66 +133,87 @@ def logout():
 
 
 
+
+
 # -------- USER --------
-@app.route('/user')
+
+@app.route('/user', methods=['POST'])
 def get_user():
-    if 'userEmail' in session:
-        print(f"Session userEmail: {session['userEmail']}")  # Debugging information
-        return jsonify(userEmail=session['userEmail'])
-    print("Unauthorized access to /user")  # Debugging information
-    return jsonify({'error': 'Unauthorized'}), 401
+    data = request.get_json()
+    session_id = data.get('sessionID')
 
-@app.route('/user_messages')
+    if verify_session(session_id):
+        user_id = session['user_id']
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT email FROM users WHERE userID = ?', (user_id,))
+        user = cursor.fetchone()
+        conn.close()
+        return jsonify(userEmail=user['email'])
+    else:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+@app.route('/user_messages', methods=['POST'])
 def user_messages():
-    if 'userEmail' not in session:
-        return jsonify({'error': 'Unauthorized'}), 401
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('''
-        SELECT m.messageID, m.text, m.feedback, u.userEmail as sender
-        FROM messages m
-        JOIN users u ON m.userID = u.userID
-        JOIN tasks t ON m.fk_taskID = t.taskID
-        WHERE t.taskID IN (
-            SELECT taskID FROM tasks WHERE userID = (SELECT userID FROM users WHERE userEmail = ?)
-        )
-    ''', (session['userEmail'],))
-    messages = cursor.fetchall()
-    conn.close()
-    message_list = [
-        {"messageID": message[0], "text": message[1], "feedback": message[2], "sender": message[3]}
-    for message in messages]
-    return jsonify(messages=message_list)
+    data = request.get_json()
+    session_id = data.get('sessionID')
 
-@app.route('/user_job_posts' )
-def user_job_posts():
-    if 'userEmail' not in session:
-        return jsonify({'error': 'Unauthorized'}), 401
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('''
-        SELECT t.taskID, t.title
-        FROM tasks t
-        JOIN users u ON t.userID = u.userID
-        WHERE u.userEmail = ?
-    ''', (session['userEmail'],))
-    tasks = cursor.fetchall()
-    job_posts = []
-    for task in tasks:
+    if verify_session(session_id):
+        user_id = session['user_id']
+        conn = get_db_connection()
+        cursor = conn.cursor()
         cursor.execute('''
-            SELECT m.messageID, m.text, u.userEmail as sender
+            SELECT m.messageID, m.text, m.feedback, u.email as sender
             FROM messages m
             JOIN users u ON m.userID = u.userID
-            WHERE m.fk_taskID = ?
-        ''', (task[0],))
+            JOIN tasks t ON m.fk_taskID = t.taskID
+            WHERE t.taskID IN (
+                SELECT taskID FROM tasks WHERE userID = ?
+            )
+        ''', (user_id,))
         messages = cursor.fetchall()
-        job_posts.append({
-            "taskID": task[0],
-            "title": task[1],
-            "messages": [{"messageID": message[0], "text": message[1], "sender": message[2]} for message in messages]
-        })
-    conn.close()
-    return jsonify(jobPosts=job_posts)
+        conn.close()
+        message_list = [
+            {"messageID": message[0], "text": message[1], "feedback": message[2], "sender": message[3]}
+        for message in messages]
+        return jsonify(messages=message_list)
+    else:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+@app.route('/user_job_posts', methods=['POST'])
+def user_job_posts():
+    data = request.get_json()
+    session_id = data.get('sessionID')
+
+    if verify_session(session_id):
+        user_id = session['user_id']
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT t.taskID, t.title
+            FROM tasks t
+            JOIN users u ON t.userID = u.userID
+            WHERE u.userID = ?
+        ''', (user_id,))
+        tasks = cursor.fetchall()
+        job_posts = []
+        for task in tasks:
+            cursor.execute('''
+                SELECT m.messageID, m.text, u.email as sender
+                FROM messages m
+                JOIN users u ON m.userID = u.userID
+                WHERE m.fk_taskID = ?
+            ''', (task[0],))
+            messages = cursor.fetchall()
+            job_posts.append({
+                "taskID": task[0],
+                "title": task[1],
+                "messages": [{"messageID": message[0], "text": message[1], "sender": message[2]} for message in messages]
+            })
+        conn.close()
+        return jsonify(jobPosts=job_posts)
+    else:
+        return jsonify({'error': 'Unauthorized'}), 401
 
 
 # Custom function to list all endpoints

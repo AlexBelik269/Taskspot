@@ -19,9 +19,7 @@ function login() {
   .then(data => {
     if (data.success) {
       localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('userEmail', email); // Save user's email
-      sessionStorage.setItem('isLoggedIn', 'true');
-      sessionStorage.setItem('userEmail', email); // Save user's email
+      localStorage.setItem('sessionID', data.sessionID); // Store session ID
       window.location.href = '../home.html';
     } else {
       loginError.textContent = 'Incorrect email or password';
@@ -31,6 +29,7 @@ function login() {
   })
   .catch(error => console.error('Error:', error));
 }
+
 
 
 function signup() {

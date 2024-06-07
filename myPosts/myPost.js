@@ -5,63 +5,84 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 function fetchUserData() {
-    fetch('http://localhost:5000/user')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.userEmail) {
-                document.getElementById('user-email').textContent = data.userEmail;
-            }
-        })
-        .catch(error => console.error('Error fetching user data:', error));
+    const sessionID = localStorage.getItem('sessionID');
+    fetch('http://localhost:5000/user', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ sessionID })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.userEmail) {
+            document.getElementById('user-email').textContent = data.userEmail;
+        }
+    })
+    .catch(error => console.error('Error fetching user data:', error));
 }
 
 function fetchUserMessages() {
-    fetch('http://localhost:5000/user_messages')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+    const sessionID = localStorage.getItem('sessionID');
+    fetch('http://localhost:5000/user_messages', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ sessionID })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        const messageList = document.getElementById('message-list');
+        if (messageList) {
+            messageList.innerHTML = '';
+            if (data.messages && data.messages.length) {
+                data.messages.forEach(message => createMessageItem(message, messageList));
+            } else {
+                messageList.textContent = 'No messages yet.';
             }
-            return response.json();
-        })
-        .then(data => {
-            const messageList = document.getElementById('message-list');
-            if (messageList) {
-                messageList.innerHTML = '';
-                if (data.messages && data.messages.length) {
-                    data.messages.forEach(message => createMessageItem(message, messageList));
-                } else {
-                    messageList.textContent = 'No messages yet.';
-                }
-            }
-        })
-        .catch(error => console.error('Error fetching messages:', error));
+        }
+    })
+    .catch(error => console.error('Error fetching messages:', error));
 }
 
 function fetchUserJobPosts() {
-    fetch('http://localhost:5000/user_job_posts')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+    const sessionID = localStorage.getItem('sessionID');
+    fetch('http://localhost:5000/user_job_posts', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ sessionID })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        const jobPostList = document.getElementById('job-post-list');
+        if (jobPostList) {
+            jobPostList.innerHTML = '';
+            if (data.jobPosts && data.jobPosts.length) {
+                data.jobPosts.forEach(post => createJobPostItem(post, jobPostList));
+            } else {
+                jobPostList.textContent = 'No job posts yet.';
             }
-            return response.json();
-        })
-        .then(data => {
-            const jobPostList = document.getElementById('job-post-list');
-            if (jobPostList) {
-                jobPostList.innerHTML = '';
-                if (data.jobPosts && data.jobPosts.length) {
-                    data.jobPosts.forEach(post => createJobPostItem(post, jobPostList));
-                } else {
-                    jobPostList.textContent = 'No job posts yet.';
-                }
-            }
-        })
-        .catch(error => console.error('Error fetching job posts:', error));
+        }
+    })
+    .catch(error => console.error('Error fetching job posts:', error));
 }
 
 
