@@ -40,5 +40,8 @@ function closeModal() {
 
 function handleLogout() {
     localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('userEmail');
+    sessionStorage.removeItem('isLoggedIn');
+    sessionStorage.removeItem('userEmail');
     window.location.href = 'home.html';
 }

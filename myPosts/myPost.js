@@ -1,30 +1,12 @@
 document.addEventListener('DOMContentLoaded', function () {
-    const logoutButton = document.getElementById('logout-button');
-    if (logoutButton) {
-        logoutButton.addEventListener('click', function () {
-            fetch('/logout')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        window.location.href = '/';
-                    }
-                })
-                .catch(error => console.error('Error during logout:', error));
-        });
-    }
-
     fetchUserData();
     fetchUserMessages();
     fetchUserJobPosts();
 });
 
 function fetchUserData() {
-    fetch('/user')
+    fetch('http://localhost:5000/user')
         .then(response => {
-            if (response.status === 401) {
-                window.location.href = '/login';
-                return;
-            }
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -39,12 +21,8 @@ function fetchUserData() {
 }
 
 function fetchUserMessages() {
-    fetch('/user_messages')
+    fetch('http://localhost:5000/user_messages')
         .then(response => {
-            if (response.status === 401) {
-                window.location.href = '/login';
-                return;
-            }
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -55,11 +33,9 @@ function fetchUserMessages() {
             if (messageList) {
                 messageList.innerHTML = '';
                 if (data.messages && data.messages.length) {
-                    data.messages.forEach(message => {
-                        const listItem = document.createElement('li');
-                        listItem.textContent = `${message.sender}: ${message.text}`;
-                        messageList.appendChild(listItem);
-                    });
+                    data.messages.forEach(message => createMessageItem(message, messageList));
+                } else {
+                    messageList.textContent = 'No messages yet.';
                 }
             }
         })
@@ -67,12 +43,8 @@ function fetchUserMessages() {
 }
 
 function fetchUserJobPosts() {
-    fetch('/user_job_posts')
+    fetch('http://localhost:5000/user_job_posts')
         .then(response => {
-            if (response.status === 401) {
-                window.location.href = '/login';
-                return;
-            }
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -83,19 +55,14 @@ function fetchUserJobPosts() {
             if (jobPostList) {
                 jobPostList.innerHTML = '';
                 if (data.jobPosts && data.jobPosts.length) {
-                    data.jobPosts.forEach(post => {
-                        const listItem = document.createElement('li');
-                        listItem.textContent = `${post.title}: ${post.description}`;
-                        jobPostList.appendChild(listItem);
-                    });
+                    data.jobPosts.forEach(post => createJobPostItem(post, jobPostList));
+                } else {
+                    jobPostList.textContent = 'No job posts yet.';
                 }
             }
         })
         .catch(error => console.error('Error fetching job posts:', error));
 }
-
-
-
 
 
 
@@ -192,25 +159,4 @@ function handleFeedback(messageID, feedback) {
         window.location.reload();
     })
     .catch(error => console.error('Error sending feedback:', error));
-}
-
-function handleLogout() {
-    fetch('http://localhost:5000/logout', { method: 'POST' })
-        .then(response => {
-            if (response.ok) {
-                localStorage.removeItem('isLoggedIn');
-                localStorage.removeItem('username');
-                window.location.href = '../home.html';
-            }
-        });
-}
-
-function toggleLoginLogoutLinks(isLoggedIn) {
-    if (isLoggedIn) {
-        document.getElementById('login-link').style.display = 'none';
-        document.getElementById('logout-link').style.display = 'block';
-    } else {
-        document.getElementById('login-link').style.display = 'block';
-        document.getElementById('logout-link').style.display = 'none';
-    }
 }

@@ -1,11 +1,11 @@
-from flask import Flask, jsonify, send_from_directory, request, render_template, session, redirect, url_for
+from flask import Flask, jsonify, request, send_from_directory, session, render_template
 from flask_cors import CORS
 import sqlite3
 import hashlib
 
-app = Flask(__name__, static_folder='taskspot')
-CORS(app)
-app.secret_key = 'your_secret_key'  # Ensure this is a secret value
+app = Flask(__name__)
+app.secret_key = 'supersecretkey'
+CORS(app, supports_credentials=True)
 database_path = 'databank.db'
 
 def get_db_connection():
@@ -13,12 +13,17 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
+@app.route('/')
+def index():
+    return send_from_directory(app.static_folder, 'home.html')
+
+
+# -------- TASKS --------
 @app.route('/tasks', methods=['GET'])
 def get_tasks():
     conn = get_db_connection()
     tasks = conn.execute('SELECT * FROM tasks').fetchall()
     conn.close()
-    
     task_list = []
     for task in tasks:
         task_list.append({
@@ -31,56 +36,54 @@ def get_tasks():
         })
     return jsonify(task_list)
 
-@app.route('/save_message', methods=['POST'])
-def save_message():
-    data = request.json
-    task_id = data['fk_taskID']
-    message_text = data['text']
-
-    conn = get_db_connection()
-    conn.execute('INSERT INTO messages (fk_taskID, text) VALUES (?, ?)',
-                 (task_id, message_text))
-    conn.commit()
-    conn.close()
-
-    return jsonify({'status': 'success'})
-
 @app.route('/save_task', methods=['POST'])
 def save_task():
-    data = request.json
-    title = data['title']
-    description = data['description']
-    city = data['city']
-    duration = data['duration']
-    price = data['price']
-
+    title = request.form['title']
+    description = request.form['description']
+    city = request.form['city']
+    duration = request.form['duration']
+    price = request.form['price']
     conn = get_db_connection()
     conn.execute('INSERT INTO tasks (title, description, city, duration, price) VALUES (?, ?, ?, ?, ?)',
                  (title, description, city, duration, price))
     conn.commit()
     conn.close()
-
     return jsonify({'status': 'success'})
 
+
+# -------- MESSAGE --------
+@app.route('/save_message', methods=['POST'])
+def save_message():
+    task_id = request.form['fk_taskID']
+    message_text = request.form['text']
+    conn = get_db_connection()
+    conn.execute('INSERT INTO messages (fk_taskID, text) VALUES (?, ?)',
+                 (task_id, message_text))
+    conn.commit()
+    conn.close()
+    return jsonify({'status': 'success'})
+
+
+# -------- LOGIN --------
 @app.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
     email = data.get('email')
     password = hashlib.sha256(data.get('password').encode()).hexdigest()
-
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute('SELECT * FROM users WHERE email = ? AND password = ?', (email, password))
     user = cursor.fetchone()
     conn.close()
-
     if user:
         session['username'] = user['username']
         session['user_id'] = user['userID']
         return jsonify({'success': True})
     else:
         return jsonify({'success': False})
+    
 
+# -------- SIGNUP --------
 @app.route('/signup', methods=['POST'])
 def signup():
     data = request.get_json()
@@ -88,21 +91,20 @@ def signup():
     email = data.get('email')
     password = hashlib.sha256(data.get('password').encode()).hexdigest()
     city = data.get('city')
-
     conn = get_db_connection()
     cursor = conn.cursor()
-
     cursor.execute('SELECT * FROM users WHERE email = ?', (email,))
     if cursor.fetchone():
         conn.close()
         return jsonify({'success': False, 'message': 'Email already exists'})
-
     cursor.execute('INSERT INTO users (username, password, email, user_city) VALUES (?, ?, ?, ?)', 
                    (username, password, email, city))
     conn.commit()
     conn.close()
     return jsonify({'success': True})
 
+
+# -------- OTHER --------
 @app.route('/get-job')
 def serve_get_job():
     return send_from_directory(app.static_folder, 'get-job/get-job.html')
@@ -116,7 +118,7 @@ def home():
     logged_in = 'username' in session
     return render_template('home.html', logged_in=logged_in)
 
-@app.route('/logout')
+@app.route('/logout', methods=['POST'])
 def logout():
     session.pop('username', None)
     session.pop('user_id', None)
@@ -124,102 +126,68 @@ def logout():
 
 
 
+# -------- USER --------
+@app.route('/user')
+def get_user():
+    if 'userEmail' in session:
+        print(f"Session userEmail: {session['userEmail']}")  # Debugging information
+        return jsonify(userEmail=session['userEmail'])
+    print("Unauthorized access to /user")  # Debugging information
+    return jsonify({'error': 'Unauthorized'}), 401
 
-@app.route('/user', methods=['GET'])
-def get_user_data():
-    if 'username' not in session:
-        return jsonify({"error": "Unauthorized access"}), 401
-
-    username = session['username']
-    return jsonify({'username': username})
-
-
-@app.route('/user_messages', methods=['GET'])
-def get_user_messages():
-    if 'username' not in session:
-        return jsonify({"error": "Unauthorized access"}), 401
-
-    username = session['username']
+@app.route('/user_messages')
+def user_messages():
+    if 'userEmail' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
     conn = get_db_connection()
     cursor = conn.cursor()
-
-    cursor.execute('''SELECT m.messageID, m.text, t.title, u.username AS sender, m.fk_taskID
-                      FROM messages m
-                      JOIN tasks t ON m.fk_taskID = t.taskID
-                      JOIN users u ON t.userID = u.userID
-                      WHERE u.username = ?''', (username,))
+    cursor.execute('''
+        SELECT m.messageID, m.text, m.feedback, u.userEmail as sender
+        FROM messages m
+        JOIN users u ON m.userID = u.userID
+        JOIN tasks t ON m.fk_taskID = t.taskID
+        WHERE t.taskID IN (
+            SELECT taskID FROM tasks WHERE userID = (SELECT userID FROM users WHERE userEmail = ?)
+        )
+    ''', (session['userEmail'],))
     messages = cursor.fetchall()
     conn.close()
+    message_list = [
+        {"messageID": message[0], "text": message[1], "feedback": message[2], "sender": message[3]}
+    for message in messages]
+    return jsonify(messages=message_list)
 
-    message_list = []
-    for message in messages:
-        message_list.append({
-            'messageID': message['messageID'],
-            'text': message['text'],
-            'taskTitle': message['title'],
-            'sender': message['sender'],
-            'feedback': None  # Placeholder for feedback status
-        })
-
-    return jsonify({"messages": message_list})
-
-@app.route('/user_job_posts', methods=['GET'])
-def get_user_job_posts():
-    if 'username' not in session:
-        return jsonify({"error": "Unauthorized access"}), 401
-
-    username = session['username']
+@app.route('/user_job_posts')
+def user_job_posts():
+    if 'userEmail' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
     conn = get_db_connection()
     cursor = conn.cursor()
-
-    cursor.execute('''SELECT t.taskID, t.title, t.description
-                      FROM tasks t
-                      JOIN users u ON t.userID = u.userID
-                      WHERE u.username = ?''', (username,))
-    job_posts = cursor.fetchall()
-
-    job_post_list = []
-    for job_post in job_posts:
-        cursor.execute('''SELECT m.messageID, m.text, u.username AS sender
-                          FROM messages m
-                          JOIN users u ON m.userID = u.userID
-                          WHERE m.fk_taskID = ?''', (job_post['taskID'],))
+    cursor.execute('''
+        SELECT t.taskID, t.title
+        FROM tasks t
+        JOIN users u ON t.userID = u.userID
+        WHERE u.userEmail = ?
+    ''', (session['userEmail'],))
+    tasks = cursor.fetchall()
+    job_posts = []
+    for task in tasks:
+        cursor.execute('''
+            SELECT m.messageID, m.text, u.userEmail as sender
+            FROM messages m
+            JOIN users u ON m.userID = u.userID
+            WHERE m.fk_taskID = ?
+        ''', (task[0],))
         messages = cursor.fetchall()
-
-        message_list = []
-        for message in messages:
-            message_list.append({
-                'messageID': message['messageID'],
-                'text': message['text'],
-                'sender': message['sender']
-            })
-
-        job_post_list.append({
-            'taskID': job_post['taskID'],
-            'title': job_post['title'],
-            'description': job_post['description'],
-            'messages': message_list
+        job_posts.append({
+            "taskID": task[0],
+            "title": task[1],
+            "messages": [{"messageID": message[0], "text": message[1], "sender": message[2]} for message in messages]
         })
-
     conn.close()
+    return jsonify(jobPosts=job_posts)
 
-    return jsonify({"jobPosts": job_post_list})
-
-@app.route('/feedback', methods=['POST'])
-def provide_feedback():
-    data = request.json
-    messageID = data['messageID']
-    feedback = data['feedback']
-
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('''UPDATE messages
-                      SET feedback = ?
-                      WHERE messageID = ?''', (feedback, messageID))
-    conn.commit()
-    conn.close()
-
-    return jsonify({"status": "success"})
 
 if __name__ == '__main__':
     app.run(debug=True)
+
