@@ -1,5 +1,5 @@
-from flask import Flask, jsonify, request, send_from_directory, session, render_template
-from flask_cors import CORS
+from flask import Flask, jsonify, request, send_from_directory, session, render_template # type: ignore
+from flask_cors import CORS # type: ignore
 import sqlite3
 import hashlib
 
@@ -70,19 +70,21 @@ def login():
     data = request.get_json()
     email = data.get('email')
     password = hashlib.sha256(data.get('password').encode()).hexdigest()
+
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute('SELECT * FROM users WHERE email = ? AND password = ?', (email, password))
     user = cursor.fetchone()
     conn.close()
+
     if user:
         session['username'] = user['username']
         session['user_id'] = user['userID']
         return jsonify({'success': True})
     else:
         return jsonify({'success': False})
-    
 
+    
 # -------- SIGNUP --------
 @app.route('/signup', methods=['POST'])
 def signup():
@@ -109,9 +111,9 @@ def signup():
 def serve_get_job():
     return send_from_directory(app.static_folder, 'get-job/get-job.html')
 
-@app.route('/<path:path>')
-def serve_static_files(path):
-    return send_from_directory(app.static_folder, path)
+#@app.route('/<path:path>')
+#def serve_static_files(path):
+#    return send_from_directory(app.static_folder, path)
 
 @app.route('/')
 def home():
@@ -157,7 +159,7 @@ def user_messages():
     for message in messages]
     return jsonify(messages=message_list)
 
-@app.route('/user_job_posts')
+@app.route('/user_job_posts' )
 def user_job_posts():
     if 'userEmail' not in session:
         return jsonify({'error': 'Unauthorized'}), 401
@@ -188,6 +190,25 @@ def user_job_posts():
     return jsonify(jobPosts=job_posts)
 
 
+# Custom function to list all endpoints
+def list_endpoints():
+    endpoints = []
+    for rule in app.url_map.iter_rules():
+        if rule.endpoint != 'static':  # Exclude static routes
+            endpoints.append({
+                'url': str(rule),
+                'methods': list(rule.methods),
+                'endpoint': rule.endpoint
+            })
+    return endpoints
+
+@app.route('/list_endpoints')
+def show_endpoints():
+    return jsonify(list_endpoints())
+
+
 if __name__ == '__main__':
     app.run(debug=True)
+
+
 

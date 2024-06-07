@@ -13,8 +13,8 @@ function fetchUserData() {
             return response.json();
         })
         .then(data => {
-            if (data) {
-                document.getElementById('user-username').textContent = data.username;
+            if (data.userEmail) {
+                document.getElementById('user-email').textContent = data.userEmail;
             }
         })
         .catch(error => console.error('Error fetching user data:', error));
