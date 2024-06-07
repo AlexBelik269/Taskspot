@@ -81,12 +81,16 @@ def login():
     if user:
         session_id = str(uuid.uuid4())
         session['user_id'] = user['userID']
-        session['sessionID'] = session_id
+        session['session_id'] = session_id
+        session['userEmail'] = email  # Add userEmail to the session
         return jsonify({'success': True, 'sessionID': session_id})
     else:
         return jsonify({'success': False})
 
+
+
 def verify_session(session_id):
+    print(session)
     return session.get('sessionID') == session_id
 
     
@@ -136,20 +140,14 @@ def logout():
 
 
 # -------- USER --------
-
 @app.route('/user', methods=['POST'])
 def get_user():
     data = request.get_json()
     session_id = data.get('sessionID')
 
     if verify_session(session_id):
-        user_id = session['user_id']
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute('SELECT email FROM users WHERE userID = ?', (user_id,))
-        user = cursor.fetchone()
-        conn.close()
-        return jsonify(userEmail=user['email'])
+        user_email = session['userEmail']
+        return jsonify(userEmail=user_email)
     else:
         return jsonify({'error': 'Unauthorized'}), 401
 
@@ -159,7 +157,7 @@ def user_messages():
     session_id = data.get('sessionID')
 
     if verify_session(session_id):
-        user_id = session['user_id']
+        user_email = session['userEmail']
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute('''
@@ -168,14 +166,15 @@ def user_messages():
             JOIN users u ON m.userID = u.userID
             JOIN tasks t ON m.fk_taskID = t.taskID
             WHERE t.taskID IN (
-                SELECT taskID FROM tasks WHERE userID = ?
+                SELECT taskID FROM tasks WHERE userID = (SELECT userID FROM users WHERE email = ?)
             )
-        ''', (user_id,))
+        ''', (user_email,))
         messages = cursor.fetchall()
         conn.close()
         message_list = [
             {"messageID": message[0], "text": message[1], "feedback": message[2], "sender": message[3]}
-        for message in messages]
+            for message in messages
+        ]
         return jsonify(messages=message_list)
     else:
         return jsonify({'error': 'Unauthorized'}), 401
@@ -186,15 +185,15 @@ def user_job_posts():
     session_id = data.get('sessionID')
 
     if verify_session(session_id):
-        user_id = session['user_id']
+        user_email = session['userEmail']
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute('''
             SELECT t.taskID, t.title
             FROM tasks t
             JOIN users u ON t.userID = u.userID
-            WHERE u.userID = ?
-        ''', (user_id,))
+            WHERE u.email = ?
+        ''', (user_email,))
         tasks = cursor.fetchall()
         job_posts = []
         for task in tasks:

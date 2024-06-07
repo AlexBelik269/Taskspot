@@ -86,8 +86,6 @@ function fetchUserJobPosts() {
 }
 
 
-
-
 function createMessageItem(message, container) {
     const messageItem = document.createElement('div');
     messageItem.classList.add('message-item');
